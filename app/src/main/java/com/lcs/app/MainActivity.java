@@ -1,8 +1,10 @@
 package com.lcs.app;
 
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -48,10 +50,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-
-
-
-        @Override
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -67,8 +66,21 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
         if (id == R.id.exit) {
             this.finish();
+        }else if( id == R.id.about ){
+            this.showAbout();
+
         }
         return super.onOptionsItemSelected(item);
+    }
+    private void showAbout(){
+        try {
+
+            String d  =  this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+            new AlertDialog.Builder(this).setTitle("about").setMessage("version:" + d ).setPositiveButton("ok", null).show();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -154,14 +166,18 @@ public class MainActivity extends ActionBarActivity {
             */
         }
 
+        private void login(){
+            saveInputData();
+            loginName.setText("login...");
+            new Thread(runnable).start();
+        }
+
         View.OnClickListener clickListener = new View.OnClickListener(){
             private int i = 0;
             @Override
             public void onClick(View view) {
-                Log.i("lcs","click" + view.getId()+view.toString());
-                loginName.setText("login...");
-                saveInputData();
-                new Thread(runnable).start();
+               // Log.i("lcs","click" + view.getId()+view.toString());
+                login();
                 return ;
             }
         };
@@ -183,8 +199,7 @@ public class MainActivity extends ActionBarActivity {
                 number.setText(input+"");
                 */
                 if (max > 15 ) {
-                    Log.i("lcs", "==========================================================");
-                    new Thread(runnable).start();
+                    login();
                 }
             }
 
