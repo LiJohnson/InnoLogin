@@ -2,10 +2,11 @@
 <resources>
 
     <string name="app_name">I</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="action_exit">exit</string>
     <string name="action_about">about</string>
-    <string name="version">1.1</string>
-
+    <string name="version">1.2</string>
+    <string name="button_signin">签到</string>
+    <string name="button_signout">签退</string>
+    <string name="switch_logout_confirm">二次确认</string>
 </resources>

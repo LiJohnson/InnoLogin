@@ -44,11 +44,12 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="login"
+            android:text="@string/button_signin"
             android:id="@+id/login"
             android:layout_gravity="left"
             android:clickable="true"
             android:visibility="visible" />
+
 
         <TextView
             android:layout_width="match_parent"
@@ -61,20 +62,24 @@
             android:singleLine="true"
             android:gravity="center" />
 
-        <EditText
-            android:layout_width="370dp"
+        <Button
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"
-            android:ems="10"
-            android:id="@+id/number"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginRight="301dp"
-            android:phoneNumber="false"
-            android:editable="false"
-            android:text="10"
-            android:visibility="gone" />
+            android:text="@string/button_signout"
+            android:id="@+id/logout"
+            android:layout_gravity="left"
+            android:focusable="true"
+            android:layout_marginTop="99dp"/>
+        <Switch
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/switch_logout_confirm"
+            android:id="@+id/logiutConfirm"
+            android:checked="true"
+            android:textOff="off"
+            android:textOn="on"
+            android:gravity="center_vertical|right" />
+
     </LinearLayout>
 
 </RelativeLayout>

@@ -1,38 +1,31 @@
 package com.lcs.app;
 
 import android.app.AlertDialog;
-import android.app.Service;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Vibrator;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
-import android.view.Window;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
-import java.security.Provider;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -93,7 +86,7 @@ public class MainActivity extends ActionBarActivity {
         private TextView name = null;
         private TextView pass = null;
         private Context context = null;
-        private TextView number = null;
+        private Switch logoutConfirm = null;
         private SensorManager sensorManager =  null ;
         public PlaceholderFragment( Context context ) {
             this.context = context;
@@ -108,11 +101,13 @@ public class MainActivity extends ActionBarActivity {
             host = (TextView)rootView.findViewById(R.id.host);
             name = (TextView)rootView.findViewById(R.id.name);
             pass = (TextView)rootView.findViewById(R.id.pass);
-            number = (TextView)rootView.findViewById(R.id.number);
+            logoutConfirm = (Switch)rootView.findViewById(R.id.logiutConfirm);
 
             this.initInputData();
 
-            rootView.findViewById(R.id.login).setOnClickListener(clickListener);
+            logoutConfirm.setOnCheckedChangeListener(logoutConfirmChange  );
+            rootView.findViewById(R.id.login ).setOnClickListener(loginClick);
+            rootView.findViewById(R.id.logout).setOnClickListener(logoutClick);
            // rootView.findViewById(R.menu.main)
             sensorManager =  (SensorManager)this.context.getSystemService(SENSOR_SERVICE);
             return rootView;
@@ -137,6 +132,7 @@ public class MainActivity extends ActionBarActivity {
             editor.putString("host",host.getText().toString());
             editor.putString("name",name.getText().toString());
             editor.putString("pass",pass.getText().toString());
+            editor.putBoolean("logoutConfirm", logoutConfirm.isChecked());
             editor.commit();
         }
         private void initInputData(){
@@ -144,6 +140,7 @@ public class MainActivity extends ActionBarActivity {
             host.setText( data.getString("host", host.getText().toString() ) );
             name.setText( data.getString("name", name.getText().toString() ) );
             pass.setText( data.getString("pass", pass.getText().toString() ) );
+            logoutConfirm.setChecked( data.getBoolean("logoutConfirm",true) );
         }
 
         private void rock(){
@@ -169,18 +166,55 @@ public class MainActivity extends ActionBarActivity {
         private void login(){
             saveInputData();
             loginName.setText("login...");
-            new Thread(runnable).start();
+            new Thread(loginRunnable).start();
         }
 
-        View.OnClickListener clickListener = new View.OnClickListener(){
+        private void logout(){
+            loginName.setText("logout...");
+            new Thread(logoutRunnable).start();
+        }
+
+        View.OnClickListener loginClick = new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                login();
+            }
+        };
+
+        View.OnClickListener logoutClick = new View.OnClickListener(){
             private int i = 0;
             @Override
             public void onClick(View view) {
-               // Log.i("lcs","click" + view.getId()+view.toString());
-                login();
+                //logout();
+                if( !logoutConfirm.isChecked() ){
+                    logout();
+                    return;
+                }
+
+                new AlertDialog.Builder(view.getContext())
+                        .setIcon(R.drawable.ic_launcher)
+                        .setTitle("下班")
+                        .setMessage("确定下班？")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                logout();
+                            }
+                        })
+                        .setNegativeButton("不要", null)
+                        .show();
                 return ;
             }
         };
+
+        CompoundButton.OnCheckedChangeListener logoutConfirmChange = new  CompoundButton.OnCheckedChangeListener(){
+
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                saveInputData();
+            }
+        };
+
         SensorEventListener sensorEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
@@ -190,7 +224,7 @@ public class MainActivity extends ActionBarActivity {
                 float z = values[2]; // z轴方向的重力加速度，向上为正
 
                 float max =  Math.max(Math.max(Math.abs(x) , Math.abs(y)),Math.abs(z)-10);
-                Log.i("lcs","MAX:" +max+ " x轴方向的重力加速度" + x +  "；y轴方向的重力加速度" + y +  "；z轴方向的重力加速度" + z);
+               // Log.i("lcs","MAX:" +max+ " x轴方向的重力加速度" + x +  "；y轴方向的重力加速度" + y +  "；z轴方向的重力加速度" + z);
 
                /* int input = 3 ;
                 try{
@@ -217,20 +251,33 @@ public class MainActivity extends ActionBarActivity {
                 String val = data.getString("value");
                 Log.i("lcs","请求结果-->" + val);
                 rock();
-                loginName.setText(new SimpleDateFormat("MM-dd hh:mm:ss").format(new Date()) + " : " + val);
+                loginName.setText( val);
             }
         };
 
-        Runnable runnable = new Runnable(){
+        Runnable loginRunnable = new Runnable(){
             @Override
             public void run() {
                 Looper.prepare();
                 String string = "n";
-                Login g = new Login( host.getText().toString() );
-                string  = g.f( name.getText().toString() , pass.getText().toString() );
+                Inno inno = new Inno( host.getText().toString() );
+                string  = inno.login(name.getText().toString(), pass.getText().toString());
                 Message msg = new Message();
                 Bundle data = new Bundle();
                 data.putString("value",string);
+                msg.setData(data);
+                handler.sendMessage(msg);
+            }
+        };
+
+        Runnable logoutRunnable = new Runnable(){
+            @Override
+            public void run() {
+                Looper.prepare();
+                String message = new Inno( host.getText().toString()).logout(name.getText().toString(), pass.getText().toString());
+                Message msg = new Message();
+                Bundle data = new Bundle();
+                data.putString("value",message);
                 msg.setData(data);
                 handler.sendMessage(msg);
             }
